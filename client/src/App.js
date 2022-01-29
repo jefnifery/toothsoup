@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
-import Test from "./components/Test";
+import MainPage from "./components/MainPage";
+import Room from "./components/Room";
 
+import "gestalt/dist/gestalt.css";
 import "./App.css";
 
 function App() {
     const [socket, setSocket] = useState(null);
+    const [roomId, setRoomId] = useState("");
+    const [username, setUsername] = useState("");
 
     useEffect(() => {
         const newSocket = io(`http://${window.location.hostname}:8000`);
@@ -15,11 +19,12 @@ function App() {
 
     return (
         <div className="App">
-            <header className="app-header">React Chat</header>
             {socket ? (
-                <div className="chat-container">
-                    <Test socket={socket} />
-                </div>
+                roomId ? (
+                    <Room socket={socket} roomId={roomId} setRoomId={setRoomId} />
+                ) : (
+                    <MainPage socket={socket} setRoomId={setRoomId} username={username} setUsername={setUsername} />
+                )
             ) : (
                 <div>Connecting...</div>
             )}
