@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
+const roomRoutes = require("./routes/roomRoutes");
 
 const app = express();
 const server = http.createServer(app);
@@ -13,6 +14,8 @@ app.use(express.json());
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, "client/build")));
+
+app.use("/room", roomRoutes);
 
 // Put all API endpoints under '/api'
 app.post("/api/message", (req, res) => {
