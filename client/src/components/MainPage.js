@@ -1,10 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Box, Flex, Button, Switch, TextField, Text, Heading, Divider } from "gestalt";
 
 function MainPage({ roomId, username, joinRoom, setRoomId, setUsername }) {
+    const usernameTextField = useRef(null);
     const [joinExistingRoom, setJoinExistingRoom] = useState(false);
 
+    useEffect(() => {
+        usernameTextField.current.focus();
+    });
+
     const canJoinRoom = username && ((joinExistingRoom && roomId) || !joinExistingRoom);
+
+    const onEnterKey = ({ event }) => {
+        if (event.code == "Enter") {
+            if (canJoinRoom) {
+                joinRoom(roomId, username);
+            }
+        }
+    };
 
     return (
         <Box padding={4}>
@@ -16,9 +29,20 @@ function MainPage({ roomId, username, joinRoom, setRoomId, setUsername }) {
                     <Switch onChange={({ value }) => setJoinExistingRoom(value)} switched={joinExistingRoom} />
                     <Text>join existing room</Text>
                 </Flex>
-                <TextField label="enter a username" onChange={({ value }) => setUsername(value)} value={username} />
+                <TextField
+                    label="enter a username"
+                    onChange={({ value }) => setUsername(value)}
+                    onKeyDown={onEnterKey}
+                    value={username}
+                    ref={usernameTextField}
+                />
                 {joinExistingRoom && (
-                    <TextField label="enter room id" onChange={({ value }) => setRoomId(value)} value={roomId} />
+                    <TextField
+                        label="enter room id"
+                        onChange={({ value }) => setRoomId(value)}
+                        onKeyDown={onEnterKey}
+                        value={roomId}
+                    />
                 )}
                 <Button text="join room" onClick={() => joinRoom(roomId, username)} disabled={!canJoinRoom} />
             </Flex>

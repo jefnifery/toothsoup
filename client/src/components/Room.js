@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Players from "./Players";
+import Chat from "./Chat";
 import { Button, Box, Flex, PageHeader, Divider } from "gestalt";
 
 function Room({ socket, username, roomId, leaveRoom }) {
@@ -30,7 +31,7 @@ function Room({ socket, username, roomId, leaveRoom }) {
                 <Flex direction="column" height="100%" width={384}>
                     <Players socket={socket} username={username} />
                     <Divider />
-                    <Box padding={4}>Chat</Box>
+                    <Chat socket={socket} username={username} roomId={roomId} />
                 </Flex>
             </Flex>
         </Flex>

@@ -27,14 +27,11 @@ app.get("*", (req, res) => {
 io.use((socket, next) => {
     const username = socket.handshake.auth.username;
     socket.username = username;
-    console.log("Username:", socket.username);
     next();
 });
 
 io.on("connection", (socket) => {
     let currentRoomId = ""; // only really used for unintention disconnect
-
-    console.log("A user connected");
 
     const emitPlayersUpdate = (roomId) => {
         const playersInRoom = io.sockets.adapter.rooms.get(roomId);
@@ -53,25 +50,30 @@ io.on("connection", (socket) => {
     };
 
     socket.on("disconnect", () => {
-        console.log("A user disconnected");
-
         emitPlayersUpdate(currentRoomId);
     });
 
     socket.on("joinRoom", ({ roomId, username }) => {
-        console.log(`${username} joined room ${roomId}`);
-
         currentRoomId = roomId;
         socket.join(roomId);
         emitPlayersUpdate(roomId);
     });
 
     socket.on("leaveRoom", ({ roomId, username }) => {
-        console.log(`${username} left room ${roomId}`);
-
         currentRoomId = "";
         emitPlayersUpdate(roomId);
         socket.leave(roomId);
+    });
+
+    socket.on("suggestWord", (event, data) => {
+        return;
+    });
+
+    socket.onAny((event, data) => {
+        console.log("------------------------------");
+        console.log(event);
+        console.log(data);
+        console.log();
     });
 });
 
