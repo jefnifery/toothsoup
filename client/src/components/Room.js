@@ -17,7 +17,7 @@ function Room({ socket, username, roomId, leaveRoom }) {
         <Flex direction="column" flex="grow" height="100%">
             <Box padding={4}>
                 <PageHeader
-                    title={`toothsoup - ${username}`}
+                    title={"toothsoup"}
                     subtext={`room: ${roomId}`}
                     primaryAction={<Button text="leave room" onClick={() => leaveRoom(roomId)} />}
                 />

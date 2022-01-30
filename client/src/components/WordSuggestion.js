@@ -23,7 +23,7 @@ function WordSuggestion({ socket, yourWord, setYourWord, onSuggestWord }) {
             <Flex width="100%" justifyContent="between" gap={4}>
                 <Box flex="grow">
                     <TextField
-                        onChange={({ value }) => setYourWord(value)}
+                        onChange={({ value }) => setYourWord(value.toUpperCase())}
                         onKeyDown={onEnterKey}
                         value={yourWord}
                         ref={suggestionTextField}
