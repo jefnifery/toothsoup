@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Flex, Button, Switch, TextField, Text, Heading } from "gestalt";
+import { Flex, Button, Switch, TextField, Text, Heading, Divider } from "gestalt";
 
 function MainPage({ socket, roomId, username, joinRoom, setRoomId, setUsername }) {
     const [joinExistingRoom, setJoinExistingRoom] = useState(false);
@@ -9,6 +9,7 @@ function MainPage({ socket, roomId, username, joinRoom, setRoomId, setUsername }
     return (
         <Flex alignItems="center" direction="column" gap={4}>
             <Heading>toothsoup</Heading>
+            <Divider />
             <Flex gap={2}>
                 <Text>create new room</Text>
                 <Switch onChange={({ value }) => setJoinExistingRoom(value)} switched={joinExistingRoom} />

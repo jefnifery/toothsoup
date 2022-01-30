@@ -15,4 +15,16 @@ router.get("/version", (req, res) => {
     });
 });
 
+router.get("/:roomId/test", (req, res) => {
+    const io = req.app.get("socketio");
+    const roomId = req.params.roomId;
+
+    console.log(`Sending details to ${roomId}`);
+    io.to(roomId).emit("details", "hi details");
+
+    return res.json({
+        status: 200,
+    });
+});
+
 module.exports = router;

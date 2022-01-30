@@ -11,26 +11,12 @@ const io = new Server(server);
 const PORT = process.env.PORT || 8000;
 
 app.use(express.json());
+app.set("socketio", io);
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, "client/build")));
 
 app.use("/room", roomRoutes);
-
-// Put all API endpoints under '/api'
-app.post("/api/message", (req, res) => {
-    const message = req.body?.message;
-
-    io.emit("message", message);
-
-    console.log(`Sent message`);
-
-    if (!message) {
-        res.json({ status: 400 });
-    } else {
-        res.json({ status: 200, message });
-    }
-});
 
 // The "catchall" handler: for any request that doesn't
 // match one above, send back React's index.html file.
@@ -38,13 +24,21 @@ app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname + "/client/build/index.html"));
 });
 
-//Whenever someone connects this gets executed
 io.on("connection", (socket) => {
     console.log("A user connected");
 
-    //Whenever someone disconnects this piece of code executed
     socket.on("disconnect", () => {
         console.log("A user disconnected");
+    });
+
+    socket.on("joinRoom", (roomId) => {
+        console.log(`A user joined room ${roomId}`);
+        socket.join(roomId);
+    });
+
+    socket.on("leaveRoom", (roomId) => {
+        console.log(`A user left room ${roomId}`);
+        socket.leave(roomId);
     });
 });
 

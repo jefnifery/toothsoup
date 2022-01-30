@@ -24,21 +24,22 @@ function App() {
             joinRoomId = Math.random().toString(36).slice(2, 8);
         }
 
+        socket.emit("joinRoom", joinRoomId);
         setRoomId(joinRoomId);
         setInRoom(true);
+    };
+
+    const leaveRoom = (leaveRoomId) => {
+        socket.emit("leaveRoom", leaveRoomId);
+        setRoomId("");
+        setInRoom(false);
     };
 
     return (
         <Box paddingX={4} paddingY={4}>
             {socket ? (
                 inRoom ? (
-                    <Room
-                        socket={socket}
-                        userName={username}
-                        roomId={roomId}
-                        setInRoom={setInRoom}
-                        setRoomId={setRoomId}
-                    />
+                    <Room socket={socket} username={username} roomId={roomId} leaveRoom={leaveRoom} />
                 ) : (
                     <MainPage
                         socket={socket}
