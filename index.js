@@ -47,6 +47,8 @@ io.on("connection", (socket) => {
                 players: [],
                 gameState: {
                     suggestions: [],
+                    upvotes: new Set(),
+                    downvotes: new Set(),
                 },
             };
         }
@@ -104,6 +106,14 @@ io.on("connection", (socket) => {
     socket.on("suggestWord", ({ roomId, username, word }) => {
         if (rooms[roomId]) {
             rooms[roomId].gameState.suggestions.push({ word, username });
+        }
+
+        emitGameState(roomId);
+    });
+
+    socket.on("voteOnSuggestion", ({ roomId, username, vote }) => {
+        if (rooms[roomId]) {
+            rooms[roomId].gameState[vote].add(username);
         }
 
         emitGameState(roomId);
