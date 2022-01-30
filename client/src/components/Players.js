@@ -5,9 +5,15 @@ function Players({ socket, username }) {
     const [players, setPlayers] = useState([]);
 
     useEffect(() => {
-        socket.on("playersUpdate", ({ players }) => {
+        const playersUpdateListener = ({ players }) => {
             setPlayers(players);
-        });
+        };
+
+        socket.on("playersUpdate", playersUpdateListener);
+
+        return () => {
+            socket.off("playersUpdate", playersUpdateListener);
+        };
     });
 
     return (

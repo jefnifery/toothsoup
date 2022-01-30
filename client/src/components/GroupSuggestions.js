@@ -5,11 +5,16 @@ function WordSuggestion({ socket }) {
     const [groupSuggestions, setGroupSuggestions] = useState([]);
 
     useEffect(() => {
-        socket.on("newGroupSuggestion", ({ word, username }) => {
-            console.log("hehehe");
+        const newGroupSuggestionListener = ({ word, username }) => {
             const newGroupSuggestions = [...groupSuggestions, { word, username }];
             setGroupSuggestions(newGroupSuggestions);
-        });
+        };
+
+        socket.on("newGroupSuggestion", newGroupSuggestionListener);
+
+        return () => {
+            socket.off("newGroupSuggestion", newGroupSuggestionListener);
+        };
     });
 
     return (
