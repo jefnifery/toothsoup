@@ -5,14 +5,6 @@ import GroupSuggestion from "./GroupSuggestions";
 
 function Chat({ socket, username, roomId }) {
     const [yourWord, setYourWord] = useState("");
-    const [groupSuggestions, setGroupSuggestions] = useState([]);
-
-    useEffect(() => {
-        socket.on("newGroupSuggestion", ({ word, username }) => {
-            const newGroupSuggestions = [...groupSuggestions, { word, username }];
-            setGroupSuggestions(newGroupSuggestions);
-        });
-    });
 
     const onSuggestWord = (word) => {
         console.log("suggesting...");
@@ -25,11 +17,7 @@ function Chat({ socket, username, roomId }) {
             <Flex direction="column" height="100%">
                 <Heading size="sm">suggestions</Heading>
                 <Divider />
-                <GroupSuggestion
-                    socket={socket}
-                    groupSuggestions={groupSuggestions}
-                    setGroupSuggestions={setGroupSuggestions}
-                />
+                <GroupSuggestion socket={socket} />
                 <Divider />
                 <WordSuggestion
                     socket={socket}

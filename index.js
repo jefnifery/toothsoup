@@ -6,7 +6,7 @@ const roomRoutes = require("./routes/roomRoutes");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, { wsEngine: require("eiows").Server });
 
 const PORT = process.env.PORT || 8000;
 
