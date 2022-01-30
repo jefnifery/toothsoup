@@ -65,8 +65,8 @@ io.on("connection", (socket) => {
         socket.leave(roomId);
     });
 
-    socket.on("suggestWord", (event, data) => {
-        return;
+    socket.on("suggestWord", ({ roomId, username, word }) => {
+        io.to(roomId).emit("newGroupSuggestion", { word, username });
     });
 
     socket.onAny((event, data) => {

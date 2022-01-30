@@ -7,7 +7,7 @@ function MainPage({ roomId, username, joinRoom, setRoomId, setUsername }) {
 
     useEffect(() => {
         usernameTextField.current.focus();
-    });
+    }, []);
 
     const canJoinRoom = username && ((joinExistingRoom && roomId) || !joinExistingRoom);
 

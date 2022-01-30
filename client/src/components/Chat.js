@@ -1,9 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Box, Flex, Heading, Divider, Text, TextField, Button } from "gestalt";
 import WordSuggestion from "./WordSuggestion";
+import GroupSuggestion from "./GroupSuggestions";
 
 function Chat({ socket, username, roomId }) {
     const [yourWord, setYourWord] = useState("");
+    const [groupSuggestions, setGroupSuggestions] = useState([]);
+
+    useEffect(() => {
+        socket.on("newGroupSuggestion", ({ word, username }) => {
+            const newGroupSuggestions = [...groupSuggestions, { word, username }];
+            setGroupSuggestions(newGroupSuggestions);
+        });
+    });
 
     const onSuggestWord = (word) => {
         console.log("suggesting...");
@@ -16,9 +25,11 @@ function Chat({ socket, username, roomId }) {
             <Flex direction="column" height="100%">
                 <Heading size="sm">suggestions</Heading>
                 <Divider />
-                <Box flex="grow">
-                    <Text>main part</Text>
-                </Box>
+                <GroupSuggestion
+                    socket={socket}
+                    groupSuggestions={groupSuggestions}
+                    setGroupSuggestions={setGroupSuggestions}
+                />
                 <Divider />
                 <WordSuggestion
                     socket={socket}

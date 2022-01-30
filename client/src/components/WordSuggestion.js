@@ -6,7 +6,7 @@ function WordSuggestion({ socket, yourWord, setYourWord, onSuggestWord }) {
 
     useEffect(() => {
         suggestionTextField.current.focus();
-    });
+    }, []);
 
     const canSuggestWord = yourWord.length === 5 && /^[a-z]+$/i.test(yourWord);
 
