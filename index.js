@@ -2,7 +2,6 @@ const express = require("express");
 const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
-const roomRoutes = require("./routes/roomRoutes");
 
 const app = express();
 const server = http.createServer(app);
@@ -16,8 +15,6 @@ app.set("socketio", io);
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, "client/build")));
 
-app.use("/room", roomRoutes);
-
 // The "catchall" handler: for any request that doesn't
 // match one above, send back React's index.html file.
 app.get("*", (req, res) => {
@@ -30,44 +27,77 @@ io.use((socket, next) => {
     next();
 });
 
+const rooms = {};
+
 io.on("connection", (socket) => {
-    let currentRoomId = ""; // only really used for unintention disconnect
+    // ------------- Globals -------------
+    let currentRoomId = "";
+    let currentUsername = "";
+
+    // ------------- Room Stuff -------------
 
     const emitPlayersUpdate = (roomId) => {
-        const playersInRoom = io.sockets.adapter.rooms.get(roomId);
-        const players = [];
-        for (let [id, socket] of io.of("/").sockets) {
-            const inRoom = playersInRoom && playersInRoom.has(id);
-            if (inRoom) {
-                players.push({
-                    playerId: id,
-                    playerName: socket.username,
-                });
-            }
-        }
-
+        players = rooms[roomId]?.players || [];
         io.to(roomId).emit("playersUpdate", { players });
     };
 
+    const joinRoom = ({ roomId, username }) => {
+        if (!rooms[roomId]) {
+            rooms[roomId] = {
+                players: [],
+                wordQueue: [],
+            };
+        }
+
+        rooms[roomId].players.push({ playerId: socket.id, playerName: username });
+
+        socket.join(roomId);
+        emitPlayersUpdate(roomId);
+    };
+
+    const leaveRoom = ({ roomId, username }) => {
+        if (rooms[roomId]) {
+            const index = rooms[roomId].players.findIndex((player) => player.playerName === username);
+            if (index !== -1) {
+                rooms[roomId].players.splice(index, 1);
+            }
+            if (rooms[roomId].players.length === 0) {
+                rooms[roomId] = undefined;
+            }
+        }
+
+        socket.leave(roomId);
+        emitPlayersUpdate(roomId);
+    };
+
     socket.on("disconnect", () => {
-        emitPlayersUpdate(currentRoomId);
+        leaveRoom({ roomId: currentRoomId, username: currentUsername });
+
+        currentRoomId = "";
+        currentUsername = "";
     });
 
     socket.on("joinRoom", ({ roomId, username }) => {
+        joinRoom({ roomId, username });
+
         currentRoomId = roomId;
-        socket.join(roomId);
-        emitPlayersUpdate(roomId);
+        currentUsername = username;
     });
 
-    socket.on("leaveRoom", ({ roomId, username }) => {
+    socket.on("leaveRoom", () => {
+        leaveRoom({ roomId: currentRoomId, username: currentUsername });
+
         currentRoomId = "";
-        emitPlayersUpdate(roomId);
-        socket.leave(roomId);
+        currentUsername = "";
     });
+
+    // ------------- Game Stuff -------------
 
     socket.on("suggestWord", ({ roomId, username, word }) => {
         io.to(roomId).emit("newGroupSuggestion", { word, username });
     });
+
+    // ------------- Other Stuff -------------
 
     socket.onAny((event, data) => {
         console.log("------------------------------");

@@ -4,22 +4,13 @@ import Chat from "./Chat";
 import { Button, Box, Flex, PageHeader, Divider } from "gestalt";
 
 function Room({ socket, username, roomId, leaveRoom }) {
-    const [test, setTest] = useState("");
-
-    useEffect(() => {
-        socket.on("details", (details) => {
-            console.log(details);
-            setTest(details);
-        });
-    });
-
     return (
         <Flex direction="column" flex="grow" height="100%">
             <Box padding={4}>
                 <PageHeader
                     title={"toothsoup"}
                     subtext={`room: ${roomId}`}
-                    primaryAction={<Button text="leave room" onClick={() => leaveRoom(roomId)} />}
+                    primaryAction={<Button text="leave room" onClick={() => leaveRoom()} />}
                 />
             </Box>
             <Divider />

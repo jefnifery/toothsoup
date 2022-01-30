@@ -34,8 +34,8 @@ function App() {
         setInRoom(true);
     };
 
-    const leaveRoom = (leaveRoomId) => {
-        socket.emit("leaveRoom", { roomId: leaveRoomId, username });
+    const leaveRoom = () => {
+        socket.emit("leaveRoom");
         setRoomId("");
         setInRoom(false);
         socket.disconnect();
