@@ -14,35 +14,38 @@ function App() {
     const [username, setUsername] = useState("");
 
     useEffect(() => {
-        const newSocket = io(`http://${window.location.hostname}:8000`);
+        const newSocket = io(`http://${window.location.hostname}:8000`, { autoConnect: false });
         setSocket(newSocket);
         return () => newSocket.close();
     }, [setSocket]);
 
-    const joinRoom = (joinRoomId) => {
+    const joinRoom = (joinRoomId, joinUsername) => {
+        socket.auth = { username: joinUsername };
+        socket.connect();
+
         if (!joinRoomId) {
             joinRoomId = Math.random().toString(36).slice(2, 8);
         }
 
-        socket.emit("joinRoom", joinRoomId);
+        socket.emit("joinRoom", { roomId: joinRoomId, username });
         setRoomId(joinRoomId);
         setInRoom(true);
     };
 
     const leaveRoom = (leaveRoomId) => {
-        socket.emit("leaveRoom", leaveRoomId);
+        socket.emit("leaveRoom", { roomId: leaveRoomId, username });
         setRoomId("");
         setInRoom(false);
+        socket.disconnect();
     };
 
     return (
-        <Box paddingX={4} paddingY={4}>
+        <Box height="100vh" width="100vw">
             {socket ? (
                 inRoom ? (
                     <Room socket={socket} username={username} roomId={roomId} leaveRoom={leaveRoom} />
                 ) : (
                     <MainPage
-                        socket={socket}
                         roomId={roomId}
                         username={username}
                         joinRoom={joinRoom}

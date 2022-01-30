@@ -24,20 +24,53 @@ app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname + "/client/build/index.html"));
 });
 
+io.use((socket, next) => {
+    const username = socket.handshake.auth.username;
+    socket.username = username;
+    console.log("Username:", socket.username);
+    next();
+});
+
 io.on("connection", (socket) => {
+    let currentRoomId = ""; // only really used for unintention disconnect
+
     console.log("A user connected");
+
+    const emitPlayersUpdate = (roomId) => {
+        const playersInRoom = io.sockets.adapter.rooms.get(roomId);
+        const players = [];
+        for (let [id, socket] of io.of("/").sockets) {
+            const inRoom = playersInRoom && playersInRoom.has(id);
+            if (inRoom) {
+                players.push({
+                    playerId: id,
+                    playerName: socket.username,
+                });
+            }
+        }
+
+        io.to(roomId).emit("playersUpdate", { players });
+    };
 
     socket.on("disconnect", () => {
         console.log("A user disconnected");
+
+        emitPlayersUpdate(currentRoomId);
     });
 
-    socket.on("joinRoom", (roomId) => {
-        console.log(`A user joined room ${roomId}`);
+    socket.on("joinRoom", ({ roomId, username }) => {
+        console.log(`${username} joined room ${roomId}`);
+
+        currentRoomId = roomId;
         socket.join(roomId);
+        emitPlayersUpdate(roomId);
     });
 
-    socket.on("leaveRoom", (roomId) => {
-        console.log(`A user left room ${roomId}`);
+    socket.on("leaveRoom", ({ roomId, username }) => {
+        console.log(`${username} left room ${roomId}`);
+
+        currentRoomId = "";
+        emitPlayersUpdate(roomId);
         socket.leave(roomId);
     });
 });

@@ -1,21 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { Button, Box, Flex, PageHeader, Text } from "gestalt";
+import { Box, Flex, Heading, Divider, Text } from "gestalt";
 
-function Players({ socket }) {
-    const [players, setPlayers] = useState(["player 1", "player 2"]);
+function Players({ socket, username }) {
+    const [players, setPlayers] = useState([]);
 
     useEffect(() => {
-        socket.on("playerUpdate", (players) => {
-            console.log(players);
+        socket.on("playersUpdate", ({ players }) => {
             setPlayers(players);
         });
     });
 
     return (
-        <Box>
-            {players.map((player) => {
-                return <Box>{player}</Box>;
-            })}
+        <Box height={256} padding={4}>
+            <Flex direction="column" height="100%">
+                <Heading size="sm">players</Heading>
+                <Divider />
+                <Box flex="grow" overflow="scrollY" marginTop={2}>
+                    {players.map((player) => {
+                        const name = player.playerName;
+                        const isYou = name == username;
+                        return (
+                            <Text>
+                                {name} {isYou ? "(you)" : ""}
+                            </Text>
+                        );
+                    })}
+                </Box>
+            </Flex>
         </Box>
     );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Players from "./Players";
-import { Button, Box, Flex, PageHeader, Text } from "gestalt";
+import { Button, Box, Flex, PageHeader, Divider } from "gestalt";
 
 function Room({ socket, username, roomId, leaveRoom }) {
     const [test, setTest] = useState("");
@@ -13,23 +13,24 @@ function Room({ socket, username, roomId, leaveRoom }) {
     });
 
     return (
-        <Flex direction="column" flex="grow">
-            <PageHeader
-                title={`toothsoup - ${username}`}
-                subtext={`room: ${roomId}`}
-                primaryAction={
-                    <Box>
-                        <Button text="leave room" onClick={() => leaveRoom(roomId)} />
-                    </Box>
-                }
-            />
-            <Flex width="100%">
-                <Box flex="grow" color="blue">
+        <Flex direction="column" flex="grow" height="100%">
+            <Box padding={4}>
+                <PageHeader
+                    title={`toothsoup - ${username}`}
+                    subtext={`room: ${roomId}`}
+                    primaryAction={<Button text="leave room" onClick={() => leaveRoom(roomId)} />}
+                />
+            </Box>
+            <Divider />
+            <Flex flex="grow" width="100%">
+                <Box flex="grow" height="100%" padding={4}>
                     Game Board
                 </Box>
-                <Flex direction="column" width={256}>
-                    <Players socket={socket} />
-                    <Box>Chat</Box>
+                <Divider />
+                <Flex direction="column" height="100%" width={384}>
+                    <Players socket={socket} username={username} />
+                    <Divider />
+                    <Box padding={4}>Chat</Box>
                 </Flex>
             </Flex>
         </Flex>
