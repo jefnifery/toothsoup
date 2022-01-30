@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const http = require("http");
 const { Server } = require("socket.io");
 
@@ -8,6 +9,11 @@ const server = http.createServer(app);
 const io = new Server(server, { wsEngine: require("eiows").Server });
 
 const PORT = process.env.PORT || 8000;
+
+const answers = new Set(fs.readFileSync("./files/answers.txt", { encoding: "utf8", flag: "r" }).trim().split("\n"));
+const allowedGuesses = new Set(
+    fs.readFileSync("./files/allowedGuesses.txt", { encoding: "utf8", flag: "r" }).trim().split("\n")
+);
 
 app.use(express.json());
 app.set("socketio", io);
@@ -45,11 +51,6 @@ io.on("connection", (socket) => {
         if (!rooms[roomId]) {
             rooms[roomId] = {
                 players: [],
-                gameState: {
-                    suggestions: [],
-                    upvotes: new Set(),
-                    downvotes: new Set(),
-                },
             };
         }
 
@@ -99,12 +100,28 @@ io.on("connection", (socket) => {
     // ------------- Game Stuff -------------
 
     const emitGameState = (roomId) => {
-        const gameState = rooms[roomId].gameState;
-        io.to(roomId).emit("gameUpdate", gameState);
+        if (rooms[roomId]?.gameState) {
+            const gameState = rooms[roomId].gameState;
+            io.to(roomId).emit("gameUpdate", gameState);
+        }
     };
 
-    socket.on("suggestWord", ({ roomId, username, word }) => {
+    socket.on("startNewGame", ({ roomId }) => {
         if (rooms[roomId]) {
+            rooms[roomId].gameState = {
+                currentWord: [...answers][Math.floor(Math.random() * answers.size)],
+                suggestions: [],
+                upvotes: new Set(),
+                downvotes: new Set(),
+                progress: "IN_PROGRESS", // 'IN_PROGRESS' | 'FINISHED'
+            };
+        }
+
+        emitGameState(roomId);
+    });
+
+    socket.on("suggestWord", ({ roomId, username, word }) => {
+        if (rooms[roomId]?.gameState) {
             rooms[roomId].gameState.suggestions.push({ word, username });
         }
 
@@ -112,7 +129,7 @@ io.on("connection", (socket) => {
     });
 
     socket.on("voteOnSuggestion", ({ roomId, username, vote }) => {
-        if (rooms[roomId]) {
+        if (rooms[roomId]?.gameState) {
             rooms[roomId].gameState[vote].add(username);
         }
 

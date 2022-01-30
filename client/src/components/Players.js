@@ -17,7 +17,7 @@ function Players({ socket, username }) {
     });
 
     return (
-        <Box height={256} padding={4}>
+        <Box height={256} minHeight={256} padding={4}>
             <Flex direction="column" height="100%">
                 <Heading size="sm">players</Heading>
                 <Divider />
