@@ -37,7 +37,7 @@ io.on("connection", (socket) => {
     // ------------- Room Stuff -------------
 
     const emitPlayersUpdate = (roomId) => {
-        players = rooms[roomId]?.players || [];
+        const players = rooms[roomId]?.players || [];
         io.to(roomId).emit("playersUpdate", { players });
     };
 
@@ -45,7 +45,9 @@ io.on("connection", (socket) => {
         if (!rooms[roomId]) {
             rooms[roomId] = {
                 players: [],
-                wordQueue: [],
+                gameState: {
+                    wordQueue: [],
+                },
             };
         }
 
@@ -70,18 +72,19 @@ io.on("connection", (socket) => {
         emitPlayersUpdate(roomId);
     };
 
+    socket.on("joinRoom", ({ roomId, username }) => {
+        joinRoom({ roomId, username });
+        emitGameState(roomId);
+
+        currentRoomId = roomId;
+        currentUsername = username;
+    });
+
     socket.on("disconnect", () => {
         leaveRoom({ roomId: currentRoomId, username: currentUsername });
 
         currentRoomId = "";
         currentUsername = "";
-    });
-
-    socket.on("joinRoom", ({ roomId, username }) => {
-        joinRoom({ roomId, username });
-
-        currentRoomId = roomId;
-        currentUsername = username;
     });
 
     socket.on("leaveRoom", () => {
@@ -93,8 +96,18 @@ io.on("connection", (socket) => {
 
     // ------------- Game Stuff -------------
 
+    const emitGameState = (roomId) => {
+        const gameState = rooms[roomId].gameState;
+        io.to(roomId).emit("gameUpdate", gameState);
+    };
+
     socket.on("suggestWord", ({ roomId, username, word }) => {
-        io.to(roomId).emit("newGroupSuggestion", { word, username });
+        if (rooms[roomId]) {
+            rooms[roomId].gameState.wordQueue.push(word);
+        }
+
+        emitGameState(roomId);
+        // io.to(roomId).emit("newGroupSuggestion", { word, username });
     });
 
     // ------------- Other Stuff -------------
