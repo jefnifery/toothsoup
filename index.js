@@ -46,7 +46,7 @@ io.on("connection", (socket) => {
             rooms[roomId] = {
                 players: [],
                 gameState: {
-                    wordQueue: [],
+                    suggestions: [],
                 },
             };
         }
@@ -103,11 +103,10 @@ io.on("connection", (socket) => {
 
     socket.on("suggestWord", ({ roomId, username, word }) => {
         if (rooms[roomId]) {
-            rooms[roomId].gameState.wordQueue.push(word);
+            rooms[roomId].gameState.suggestions.push({ word, username });
         }
 
         emitGameState(roomId);
-        // io.to(roomId).emit("newGroupSuggestion", { word, username });
     });
 
     // ------------- Other Stuff -------------

@@ -4,7 +4,7 @@ import Chat from "./Chat";
 import { Button, Box, Flex, PageHeader, Divider } from "gestalt";
 
 function Room({ socket, username, roomId, leaveRoom }) {
-    const [gameState, setGameState] = useState({ wordQueue: [] });
+    const [gameState, setGameState] = useState({ suggestions: [] });
 
     useEffect(() => {
         const gameUpdateListener = (gameState) => {
