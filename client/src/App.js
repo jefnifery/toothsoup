@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import MainPage from "./components/MainPage";
-import Room from "./components/Room";
+import Game from "./components/Game";
 import { Box } from "gestalt";
 
 import "gestalt/dist/gestalt.css";
@@ -45,7 +45,7 @@ function App() {
         <Box height="100vh" width="100vw">
             {socket ? (
                 inRoom ? (
-                    <Room socket={socket} username={username} roomId={roomId} leaveRoom={leaveRoom} />
+                    <Game socket={socket} username={username} roomId={roomId} leaveRoom={leaveRoom} />
                 ) : (
                     <MainPage
                         roomId={roomId}

@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from "react";
 import Players from "./Players";
 import Chat from "./Chat";
-import { Button, Box, Flex, PageHeader, Divider, Layer } from "gestalt";
+import GameOverlay from "./StartGameOverlay";
+import GameHeader from "./GameHeader";
 
-function Room({ socket, username, roomId, leaveRoom }) {
+import { Box, Flex, Divider, FixedZIndex, CompositeZIndex } from "gestalt";
+
+function Game({ socket, username, roomId, leaveRoom }) {
     const [gameState, setGameState] = useState({});
     const gameInProgress = gameState.progress === "IN_PROGRESS";
+
+    // ------------------- Z-Index ------------------- //
+    const GAME_OVERLAY_ZINDEX = new FixedZIndex(10);
+    const GAME_HEADER_ZINDEX = new CompositeZIndex([GAME_OVERLAY_ZINDEX]);
 
     useEffect(() => {
         const gameUpdateListener = (gameState) => {
@@ -26,13 +33,7 @@ function Room({ socket, username, roomId, leaveRoom }) {
     return (
         <Box height="100%">
             <Flex direction="column" flex="grow" height="100%">
-                <Box padding={4}>
-                    <PageHeader
-                        title={"toothsoup"}
-                        subtext={`room: ${roomId}`}
-                        primaryAction={<Button text="leave room" onClick={() => leaveRoom()} />}
-                    />
-                </Box>
+                <GameHeader socket={socket} roomId={roomId} leaveRoom={leaveRoom} zindex={GAME_HEADER_ZINDEX} />
                 <Divider />
                 <Flex flex="grow" width="100%">
                     <Box flex="grow" height="100%" padding={4}>
@@ -47,14 +48,10 @@ function Room({ socket, username, roomId, leaveRoom }) {
                 </Flex>
             </Flex>
             {!gameInProgress && (
-                <Layer>
-                    <Box color="blue" opacity={0.3} position="fixed" top bottom left right>
-                        <Button text="start game" onClick={() => onStartGame(roomId)} />
-                    </Box>
-                </Layer>
+                <GameOverlay socket={socket} roomId={roomId} onStartGame={onStartGame} zindex={GAME_OVERLAY_ZINDEX} />
             )}
         </Box>
     );
 }
 
-export default Room;
+export default Game;
